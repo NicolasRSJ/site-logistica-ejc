@@ -1,0 +1,8 @@
+{
+  "name": "EJC - Regresso de Encontristas",
+  "description": "Aplicativo mobile-first para validação de buscadores e visualização de rotas dos encontristas do Encontro de Jovens com Cristo.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

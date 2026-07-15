@@ -1,0 +1,74 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "An escort/driver authorized to retrieve specific encontristas",
+      "type": "object",
+      "properties": {
+        "phone": {
+          "type": "string",
+          "description": "Phone number used for authentication"
+        },
+        "name": {
+          "type": "string",
+          "description": "Full name of the user/escort"
+        },
+        "assignedEncontristas": {
+          "type": "array",
+          "description": "List of encontrista IDs assigned to this user"
+        }
+      },
+      "required": ["phone", "name"]
+    },
+    "Encontrista": {
+      "title": "Encontrista",
+      "description": "A retreat participant to be picked up and taken home",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Full name of the encontrista"
+        },
+        "phone": {
+          "type": "string",
+          "description": "Main contact phone number"
+        },
+        "medication": {
+          "type": "string",
+          "description": "Medication details or 'Nenhuma'"
+        },
+        "disability": {
+          "type": "string",
+          "description": "Disability details or 'Nenhuma'"
+        },
+        "observations": {
+          "type": "string",
+          "description": "Additional notes"
+        },
+        "address": {
+          "type": "string",
+          "description": "Full street address"
+        },
+        "complement": {
+          "type": "string",
+          "description": "Address complement (e.g. apartment number)"
+        },
+        "additionalPhones": {
+          "type": "string",
+          "description": "Comma-separated or list of additional contacts"
+        }
+      },
+      "required": ["name", "phone", "address"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Users/escorts database"
+    },
+    "/encontristas/{encontristaId}": {
+      "schema": "Encontrista",
+      "description": "Encontristas/participants database"
+    }
+  }
+}

@@ -1,0 +1,12 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper function to check if any user document matches the request
+    match /users/{userId} {
+      allow read, write: if true;
+    }
+    match /encontristas/{encontristaId} {
+      allow read, write: if true;
+    }
+  }
+}
