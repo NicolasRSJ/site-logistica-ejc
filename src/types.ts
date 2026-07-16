@@ -6,6 +6,7 @@ export interface User {
   role?: 'admin' | 'user';
   email?: string;
   type?: 'solteiro' | 'casal';
+  loginMethod?: 'phone' | 'email';
 }
 
 export interface Task {

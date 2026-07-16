@@ -33,7 +33,7 @@ export const getCircleColorStyles = (colorName?: string) => {
 };
 
 export default function Dashboard({ user, onLogout }: DashboardProps) {
-  if (user.role === 'admin') {
+  if (user.role === 'admin' && user.loginMethod === 'email') {
     return <AdminDashboard user={user} onLogout={onLogout} />;
   }
 

@@ -76,7 +76,8 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
             name: data.name,
             phone: data.phone,
             assignedEncontristas: data.assignedEncontristas || [],
-            role: data.role || 'user'
+            role: data.role || 'user',
+            loginMethod: 'phone'
           };
         }
       });
@@ -122,7 +123,8 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
         phone: '',
         assignedEncontristas: [],
         role: 'admin',
-        email: 'nicolassjesus@gmail.com'
+        email: 'nicolassjesus@gmail.com',
+        loginMethod: 'email'
       };
 
       try {
@@ -159,7 +161,8 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
           phone: '',
           assignedEncontristas: [],
           role: 'admin',
-          email: emailInput
+          email: emailInput,
+          loginMethod: 'email'
         };
 
         // Save admin user reference in the users collection with role: 'admin'
@@ -183,7 +186,8 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
           phone: '',
           assignedEncontristas: [],
           role: 'admin',
-          email: emailInput
+          email: emailInput,
+          loginMethod: 'email'
         };
 
         setIsLoading(false);

@@ -40,6 +40,19 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
 
+  // Custom confirmation modal state to bypass blocked native window.confirm in iframe
+  const [deleteConfirm, setDeleteConfirm] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {},
+  });
+
   // Form States - Encontrista
   const [encName, setEncName] = useState('');
   const [encPhone, setEncPhone] = useState('');
@@ -220,16 +233,23 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
     }
   };
 
-  const handleDeleteEnc = async (id: string) => {
-    if (!window.confirm('Tem certeza de que deseja remover este encontrista do sistema?')) return;
-    try {
-      await deleteDoc(doc(db, 'encontristas', id));
-      showNotification('Encontrista removido.');
-      fetchData();
-    } catch (e) {
-      console.error(e);
-      showNotification('Erro ao excluir encontrista.', 'error');
-    }
+  const handleDeleteEnc = (id: string) => {
+    setDeleteConfirm({
+      isOpen: true,
+      title: 'Remover Encontrista',
+      message: 'Tem certeza de que deseja remover este encontrista do sistema? Essa ação não pode ser desfeita.',
+      onConfirm: async () => {
+        try {
+          await deleteDoc(doc(db, 'encontristas', id));
+          showNotification('Encontrista removido.');
+          fetchData();
+        } catch (e) {
+          console.error(e);
+          showNotification('Erro ao excluir encontrista.', 'error');
+        }
+        setDeleteConfirm(prev => ({ ...prev, isOpen: false }));
+      }
+    });
   };
 
   // --- CRUD USER / BUSCADOR ---
@@ -290,16 +310,23 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
     }
   };
 
-  const handleDeleteUser = async (id: string) => {
-    if (!window.confirm('Tem certeza de que deseja remover este usuário?')) return;
-    try {
-      await deleteDoc(doc(db, 'users', id));
-      showNotification('Usuário removido com sucesso!');
-      fetchData();
-    } catch (e) {
-      console.error(e);
-      showNotification('Erro ao excluir usuário.', 'error');
-    }
+  const handleDeleteUser = (id: string) => {
+    setDeleteConfirm({
+      isOpen: true,
+      title: 'Remover Usuário',
+      message: 'Tem certeza de que deseja remover este usuário? Essa ação não pode ser desfeita.',
+      onConfirm: async () => {
+        try {
+          await deleteDoc(doc(db, 'users', id));
+          showNotification('Usuário removido com sucesso!');
+          fetchData();
+        } catch (e) {
+          console.error(e);
+          showNotification('Erro ao excluir usuário.', 'error');
+        }
+        setDeleteConfirm(prev => ({ ...prev, isOpen: false }));
+      }
+    });
   };
 
   const handleToggleAssignedEnc = (encId: string) => {
@@ -361,16 +388,23 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
     }
   };
 
-  const handleDeleteTask = async (id: string) => {
-    if (!window.confirm('Excluir esta tarefa?')) return;
-    try {
-      await deleteDoc(doc(db, 'tasks', id));
-      showNotification('Tarefa removida.');
-      fetchData();
-    } catch (e) {
-      console.error(e);
-      showNotification('Erro ao excluir tarefa.', 'error');
-    }
+  const handleDeleteTask = (id: string) => {
+    setDeleteConfirm({
+      isOpen: true,
+      title: 'Excluir Tarefa',
+      message: 'Tem certeza de que deseja excluir esta tarefa? Essa ação não pode ser desfeita.',
+      onConfirm: async () => {
+        try {
+          await deleteDoc(doc(db, 'tasks', id));
+          showNotification('Tarefa removida.');
+          fetchData();
+        } catch (e) {
+          console.error(e);
+          showNotification('Erro ao excluir tarefa.', 'error');
+        }
+        setDeleteConfirm(prev => ({ ...prev, isOpen: false }));
+      }
+    });
   };
 
   const handleToggleTaskStatusDirect = async (task: Task) => {
@@ -1351,6 +1385,50 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
                   </button>
                 </div>
               </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* 4. CUSTOM CONFIRMATION DELETE DIALOG */}
+      <AnimatePresence>
+        {deleteConfirm.isOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
+            <motion.div 
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-white rounded-[24px] border border-slate-200 shadow-xl max-w-sm w-full overflow-hidden flex flex-col"
+            >
+              <div className="p-6 text-center space-y-4">
+                <div className="mx-auto w-12 h-12 rounded-full bg-red-50 flex items-center justify-center text-red-600">
+                  <AlertTriangle className="h-6 w-6" />
+                </div>
+                <div className="space-y-1.5">
+                  <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider font-display">
+                    {deleteConfirm.title}
+                  </h3>
+                  <p className="text-xs text-slate-500 leading-relaxed">
+                    {deleteConfirm.message}
+                  </p>
+                </div>
+              </div>
+              <div className="bg-slate-50 px-6 py-4 flex gap-3 justify-end border-t border-slate-100">
+                <button 
+                  type="button"
+                  onClick={() => setDeleteConfirm(prev => ({ ...prev, isOpen: false }))}
+                  className="bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 rounded-xl py-2 px-4 text-xs font-bold transition cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button 
+                  type="button"
+                  onClick={deleteConfirm.onConfirm}
+                  className="bg-red-600 hover:bg-red-700 text-white rounded-xl py-2 px-5 text-xs font-bold shadow-sm transition active:scale-95 cursor-pointer"
+                >
+                  Excluir
+                </button>
+              </div>
             </motion.div>
           </div>
         )}
