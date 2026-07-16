@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   LogOut, Car, CheckCircle2, Circle, MapPin, 
-  ChevronRight, Sparkles, Heart, AlertTriangle, RefreshCw, Clock
+  ChevronRight, Sparkles, Heart, AlertTriangle, RefreshCw, Clock,
+  CheckSquare, Square, ClipboardList
 } from 'lucide-react';
 import { collection, doc, getDoc, getDocs, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
-import { User, Encontrista } from '../types';
+import { User, Encontrista, Task } from '../types';
 import EncontristaDetail from './EncontristaDetail';
+import AdminDashboard from './AdminDashboard';
 
 interface DashboardProps {
   user: User;
@@ -31,7 +33,12 @@ export const getCircleColorStyles = (colorName?: string) => {
 };
 
 export default function Dashboard({ user, onLogout }: DashboardProps) {
+  if (user.role === 'admin') {
+    return <AdminDashboard user={user} onLogout={onLogout} />;
+  }
+
   const [encontristas, setEncontristas] = useState<Encontrista[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedEncontrista, setSelectedEncontrista] = useState<Encontrista | null>(null);
   const [activeTab, setActiveTab] = useState<TabType>('all');
@@ -42,7 +49,7 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
   const getBuscadorType = (name: string) => {
     const lower = name.toLowerCase();
     if (lower.includes('tio') || lower.includes('tia') || lower.includes('casal') || lower.includes('&') || lower.includes(' e ')) {
-      return 'Casal Coordenador';
+      return 'Buscador Casado';
     }
     return 'Buscador Solteiro(a)';
   };
@@ -118,10 +125,41 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
         }
       }
       setEncontristas(list);
+
+      // Fetch tasks assigned to this user or all
+      try {
+        const taskSnap = await getDocs(collection(db, 'tasks'));
+        const taskList: Task[] = [];
+        taskSnap.forEach(d => {
+          const data = d.data();
+          taskList.push({
+            id: d.id,
+            title: data.title || '',
+            description: data.description || '',
+            status: data.status || 'pending',
+            assignedTo: data.assignedTo || 'all',
+            createdAt: data.createdAt || ''
+          });
+        });
+        const myTasks = taskList.filter(t => t.assignedTo === 'all' || t.assignedTo === user.id);
+        setTasks(myTasks);
+      } catch (taskErr) {
+        console.error("Error loading tasks:", taskErr);
+      }
     } catch (err) {
       console.error("Error loading encontristas:", err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleToggleTaskStatus = async (task: Task) => {
+    try {
+      const newStatus = task.status === 'pending' ? 'completed' : 'pending';
+      await updateDoc(doc(db, 'tasks', task.id), { status: newStatus });
+      setTasks(prev => prev.map(t => t.id === task.id ? { ...t, status: newStatus } : t));
+    } catch (err) {
+      console.error("Failed to update task status:", err);
     }
   };
 
@@ -527,6 +565,47 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
             </AnimatePresence>
           )}
         </div>
+
+        {/* Driver Tasks Section */}
+        {tasks.length > 0 && (
+          <div className="mt-6 bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
+            <p className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-1.5 border-b border-slate-100 pb-2.5">
+              <ClipboardList className="h-4 w-4 text-blue-600" /> Minhas Obrigações / Tarefas
+            </p>
+            <div className="space-y-3">
+              {tasks.map(task => {
+                const isCompleted = task.status === 'completed';
+                return (
+                  <div 
+                    key={task.id}
+                    className="flex gap-2.5 items-start text-xs border border-slate-50 p-2.5 rounded-xl hover:bg-slate-50/50 transition"
+                  >
+                    <button 
+                      onClick={() => handleToggleTaskStatus(task)}
+                      className="shrink-0 text-slate-400 hover:text-blue-600 active:scale-95 transition cursor-pointer"
+                    >
+                      {isCompleted ? (
+                        <CheckSquare className="h-4.5 w-4.5 text-blue-600" />
+                      ) : (
+                        <Square className="h-4.5 w-4.5 text-slate-300" />
+                      )}
+                    </button>
+                    <div className="min-w-0 flex-1">
+                      <p className={`font-bold leading-tight ${isCompleted ? 'line-through text-slate-400' : 'text-slate-800'}`}>
+                        {task.title}
+                      </p>
+                      {task.description && (
+                        <p className={`text-[11px] mt-0.5 leading-normal ${isCompleted ? 'text-slate-400/80' : 'text-slate-500'}`}>
+                          {task.description}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Useful info card */}
         <div className="mt-8 bg-blue-50/40 border border-blue-100/60 rounded-2xl p-5 text-slate-700 space-y-3.5 shadow-sm">

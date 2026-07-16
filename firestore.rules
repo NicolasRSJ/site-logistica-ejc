@@ -8,5 +8,8 @@ service cloud.firestore {
     match /encontristas/{encontristaId} {
       allow read, write: if true;
     }
+    match /tasks/{taskId} {
+      allow read, write: if true;
+    }
   }
 }

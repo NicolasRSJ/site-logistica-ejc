@@ -59,6 +59,34 @@
         }
       },
       "required": ["name", "phone", "address"]
+    },
+    "Task": {
+      "title": "Task",
+      "description": "A logistic task created by an administrator for the team",
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Short description of what needs to be done"
+        },
+        "description": {
+          "type": "string",
+          "description": "Detailed explanation of the task"
+        },
+        "status": {
+          "type": "string",
+          "description": "Status of the task ('pending' or 'completed')"
+        },
+        "assignedTo": {
+          "type": "string",
+          "description": "ID of the user assigned to this task, or 'all'"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "ISO timestamp of creation"
+        }
+      },
+      "required": ["title", "status", "assignedTo"]
     }
   },
   "firestore": {
@@ -69,6 +97,10 @@
     "/encontristas/{encontristaId}": {
       "schema": "Encontrista",
       "description": "Encontristas/participants database"
+    },
+    "/tasks/{taskId}": {
+      "schema": "Task",
+      "description": "Logistics tasks created by administrators"
     }
   }
 }

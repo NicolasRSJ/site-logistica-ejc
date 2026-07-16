@@ -3,6 +3,18 @@ export interface User {
   name: string;
   phone: string;
   assignedEncontristas: string[];
+  role?: 'admin' | 'user';
+  email?: string;
+  type?: 'solteiro' | 'casal';
+}
+
+export interface Task {
+  id: string;
+  title: string;
+  description?: string;
+  status: 'pending' | 'completed';
+  assignedTo: string; // user ID or "all"
+  createdAt: string;
 }
 
 export interface Encontrista {

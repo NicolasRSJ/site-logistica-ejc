@@ -7,6 +7,7 @@ import {
   collection, 
   getDocs 
 } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
 
 // Firebase Config from firebase-applet-config.json
 const firebaseConfig = {
@@ -22,6 +23,7 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+const auth = getAuth(app);
 
 /**
  * Validates connection to Firestore as per SKILL guidelines
@@ -160,11 +162,25 @@ export async function seedDatabaseIfEmpty() {
       }
       console.log("Firestore seeding completed successfully.");
     } else {
-      console.log("Firestore is already seeded.");
+      console.log("Firestore is already seeded with users & encontristas.");
+    }
+
+    // Seed Tasks if empty
+    const tasksSnapshot = await getDocs(collection(db, 'tasks'));
+    if (tasksSnapshot.empty) {
+      console.log("Seeding initial logistics tasks...");
+      const initialTask = {
+        title: "Buscar mensagens do saco de choro na casa da mãe",
+        description: "Coletar com carinho as cartas/mensagens preparadas pela família na residência materna para o momento do saco de choro no domingo.",
+        status: "pending",
+        assignedTo: "all",
+        createdAt: new Date().toISOString()
+      };
+      await setDoc(doc(db, 'tasks', 'task_initial_1'), initialTask);
     }
   } catch (error) {
     console.error("Failed to seed database:", error);
   }
 }
 
-export { db };
+export { db, auth };
