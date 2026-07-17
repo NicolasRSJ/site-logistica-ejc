@@ -66,7 +66,12 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
       const d = enc.dropoff_day2 || 'pending';
       return (p === 'completed' && d === 'completed') ? 'completed' : 'pending';
     }
-    return enc.pickup_day3 || 'pending';
+    if (day === 3) {
+      const p = enc.pickup_day3 || 'pending';
+      const d = enc.dropoff_day3 || 'pending';
+      return (p === 'completed' && d === 'completed') ? 'completed' : 'pending';
+    }
+    return 'pending';
   };
 
   // Fetch assigned encontristas for this user
@@ -99,6 +104,7 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
           const p2 = data.pickup_day2 || (data.status_day2 === 'completed' || data.status === 'completed' ? 'completed' : 'pending');
           const d2 = data.dropoff_day2 || (data.status_day2 === 'completed' || data.status === 'completed' ? 'completed' : 'pending');
           const p3 = data.pickup_day3 || (data.status_day3 === 'completed' || data.status === 'completed' ? 'completed' : 'pending');
+          const d3 = data.dropoff_day3 || (data.status_day3 === 'completed' || data.status === 'completed' ? 'completed' : 'pending');
 
           list.push({
             id: docSnap.id,
@@ -119,6 +125,7 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
             pickup_day2: p2,
             dropoff_day2: d2,
             pickup_day3: p3,
+            dropoff_day3: d3,
             isMoita: !!data.isMoita,
             circleColor: data.circleColor || '',
           });
@@ -182,15 +189,10 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
       updateData[fieldKey] = newVal;
 
       // Calculate the day-specific summary status (status_dayX) and fallback general status
-      let dayCompleted = false;
-      if (activeDay === 3) {
-        dayCompleted = newVal === 'completed';
-      } else {
-        const otherPhase = phase === 'pickup' ? 'dropoff' : 'pickup';
-        const otherFieldKey = `${otherPhase}_day${activeDay}`;
-        const otherVal = (target as any)[otherFieldKey] || 'pending';
-        dayCompleted = newVal === 'completed' && otherVal === 'completed';
-      }
+      const otherPhase = phase === 'pickup' ? 'dropoff' : 'pickup';
+      const otherFieldKey = `${otherPhase}_day${activeDay}`;
+      const otherVal = (target as any)[otherFieldKey] || 'pending';
+      const dayCompleted = newVal === 'completed' && otherVal === 'completed';
 
       const statusField = `status_day${activeDay}`;
       updateData[statusField] = dayCompleted ? 'completed' : 'pending';
@@ -334,9 +336,9 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
             )}
             {activeDay === 3 && (
               <>
-                <p className="text-xs font-bold text-slate-800 mt-0.5">07:00 às 19:00 (Domingo)</p>
-                <p className="text-[11px] text-slate-500 mt-0.5 leading-snug font-bold text-blue-700">
-                  Apenas buscar o jovem em casa (antes das 07:00) e trazer ao local. Não haverá rota de retorno!
+                <p className="text-xs font-bold text-slate-800 mt-0.5">07:00 às 22:00 (Domingo)</p>
+                <p className="text-[11px] text-slate-500 mt-0.5 leading-snug">
+                  Os jovens devem ser buscados em casa (antes das 07:00) e levados de volta ao final do encontro (após 22:00).
                 </p>
               </>
             )}
@@ -349,7 +351,7 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
             <div>
               <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">Progresso do Dia</span>
               <span className="text-lg font-bold font-display mt-0.5 block text-slate-800">
-                {completedCount} <span className="text-slate-500 text-xs font-normal">de {totalCount} jovens {activeDay === 3 ? 'buscados' : 'entregues'}</span>
+                {completedCount} <span className="text-slate-500 text-xs font-normal">de {totalCount} jovens entregues</span>
               </span>
             </div>
             <div className="bg-blue-50 text-blue-700 text-[10px] font-bold px-2.5 py-1 rounded-full border border-blue-100">

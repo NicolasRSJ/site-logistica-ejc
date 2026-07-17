@@ -124,6 +124,7 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
           pickup_day2: data.pickup_day2,
           dropoff_day2: data.dropoff_day2,
           pickup_day3: data.pickup_day3,
+          dropoff_day3: data.dropoff_day3,
         });
       });
       setEncontristas(encList);

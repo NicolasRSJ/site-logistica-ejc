@@ -38,6 +38,7 @@ export interface Encontrista {
   pickup_day2?: 'pending' | 'completed';
   dropoff_day2?: 'pending' | 'completed';
   pickup_day3?: 'pending' | 'completed';
+  dropoff_day3?: 'pending' | 'completed';
   isMoita?: boolean;
   circleColor?: string; // e.g. "Vermelho", "Azul", "Amarelo", "Verde", "Laranja", "Roxo"
 }

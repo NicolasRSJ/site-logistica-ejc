@@ -9,15 +9,15 @@ import {
 } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 
-// Firebase Config from firebase-applet-config.json
+// Firebase Config from environment variables with fallback values
 export const firebaseConfig = {
-  projectId: "macro-courier-jdw77",
-  appId: "1:845629454968:web:3f8c40ac789625cc9f8b8d",
-  apiKey: "AIzaSyCyri_GTTHrIoT-QLu2NSYHT0HMYczhhTY",
-  authDomain: "macro-courier-jdw77.firebaseapp.com",
-  firestoreDatabaseId: "ai-studio-3cf6de32-0d19-4630-9c6a-8f90804d0466",
-  storageBucket: "macro-courier-jdw77.firebasestorage.app",
-  messagingSenderId: "845629454968"
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "macro-courier-jdw77",
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:845629454968:web:3f8c40ac789625cc9f8b8d",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyCyri_GTTHrIoT-QLu2NSYHT0HMYczhhTY",
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "macro-courier-jdw77.firebaseapp.com",
+  firestoreDatabaseId: import.meta.env.VITE_FIREBASE_FIRESTORE_DATABASE_ID || "ai-studio-3cf6de32-0d19-4630-9c6a-8f90804d0466",
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "macro-courier-jdw77.firebasestorage.app",
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "845629454968"
 };
 
 // Initialize Firebase

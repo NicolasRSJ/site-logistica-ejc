@@ -50,7 +50,7 @@ export default function EncontristaDetail({ encontrista, onClose, onToggleStatus
 
   // Determine status for this day
   const pickupStatus = (activeDay === 1 ? encontrista.pickup_day1 : (activeDay === 2 ? encontrista.pickup_day2 : encontrista.pickup_day3)) || 'pending';
-  const dropoffStatus = (activeDay === 1 ? encontrista.dropoff_day1 : (activeDay === 2 ? encontrista.dropoff_day2 : 'pending')) || 'pending';
+  const dropoffStatus = (activeDay === 1 ? encontrista.dropoff_day1 : (activeDay === 2 ? encontrista.dropoff_day2 : encontrista.dropoff_day3)) || 'pending';
 
   return (
     <motion.div
@@ -80,8 +80,8 @@ export default function EncontristaDetail({ encontrista, onClose, onToggleStatus
           <div className="flex justify-between items-start gap-4">
             <div>
               <div className="flex flex-wrap gap-1.5 mb-1.5">
-                {activeDay === 3 ? (
-                  pickupStatus === 'completed' ? (
+                <>
+                  {pickupStatus === 'completed' ? (
                     <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-emerald-100">
                       <CheckCircle className="h-3 w-3" /> Busca Concluída
                     </span>
@@ -89,29 +89,17 @@ export default function EncontristaDetail({ encontrista, onClose, onToggleStatus
                     <span className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-blue-100">
                       <Clock className="h-3 w-3 animate-pulse" /> Busca Pendente
                     </span>
-                  )
-                ) : (
-                  <>
-                    {pickupStatus === 'completed' ? (
-                      <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-emerald-100">
-                        <CheckCircle className="h-3 w-3" /> Busca Concluída
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-blue-100">
-                        <Clock className="h-3 w-3 animate-pulse" /> Busca Pendente
-                      </span>
-                    )}
-                    {dropoffStatus === 'completed' ? (
-                      <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-emerald-100">
-                        <CheckCircle className="h-3 w-3" /> Retorno Concluído
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-blue-100">
-                        <Clock className="h-3 w-3 animate-pulse" /> Retorno Pendente
-                      </span>
-                    )}
-                  </>
-                )}
+                  )}
+                  {dropoffStatus === 'completed' ? (
+                    <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-emerald-100">
+                      <CheckCircle className="h-3 w-3" /> Retorno Concluído
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-blue-100">
+                      <Clock className="h-3 w-3 animate-pulse" /> Retorno Pendente
+                    </span>
+                  )}
+                </>
               </div>
               <h2 className="text-lg font-bold font-display text-slate-850 leading-tight">
                 {encontrista.name}
@@ -262,41 +250,28 @@ export default function EncontristaDetail({ encontrista, onClose, onToggleStatus
             ID: {encontrista.id}
           </div>
           <div className="flex gap-2 w-full sm:w-auto flex-1 justify-end">
-            {activeDay === 3 ? (
+            <>
               <button
                 onClick={() => onToggleStatus(encontrista.id, 'pickup')}
-                className={`w-full sm:w-auto px-5 py-2.5 rounded-xl font-bold text-xs transition active:scale-95 cursor-pointer flex items-center justify-center gap-1.5 border ${
+                className={`flex-1 sm:flex-none px-4 py-2.5 rounded-xl font-bold text-xs transition active:scale-95 cursor-pointer flex items-center justify-center gap-1.5 border ${
                   pickupStatus === 'completed'
                     ? 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100'
                     : 'bg-emerald-600 text-white border-transparent hover:bg-emerald-700 shadow-sm shadow-emerald-200'
                 }`}
               >
-                {pickupStatus === 'completed' ? 'Marcar Busca Pendente' : 'Confirmar Busca'}
+                {pickupStatus === 'completed' ? 'Busca Pendente' : 'Confirmar Busca'}
               </button>
-            ) : (
-              <>
-                <button
-                  onClick={() => onToggleStatus(encontrista.id, 'pickup')}
-                  className={`flex-1 sm:flex-none px-4 py-2.5 rounded-xl font-bold text-xs transition active:scale-95 cursor-pointer flex items-center justify-center gap-1.5 border ${
-                    pickupStatus === 'completed'
-                      ? 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100'
-                      : 'bg-emerald-600 text-white border-transparent hover:bg-emerald-700 shadow-sm shadow-emerald-200'
-                  }`}
-                >
-                  {pickupStatus === 'completed' ? 'Busca Pendente' : 'Confirmar Busca'}
-                </button>
-                <button
-                  onClick={() => onToggleStatus(encontrista.id, 'dropoff')}
-                  className={`flex-1 sm:flex-none px-4 py-2.5 rounded-xl font-bold text-xs transition active:scale-95 cursor-pointer flex items-center justify-center gap-1.5 border ${
-                    dropoffStatus === 'completed'
-                      ? 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100'
-                      : 'bg-emerald-600 text-white border-transparent hover:bg-emerald-700 shadow-sm shadow-emerald-200'
-                  }`}
-                >
-                  {dropoffStatus === 'completed' ? 'Retorno Pendente' : 'Confirmar Retorno'}
-                </button>
-              </>
-            )}
+              <button
+                onClick={() => onToggleStatus(encontrista.id, 'dropoff')}
+                className={`flex-1 sm:flex-none px-4 py-2.5 rounded-xl font-bold text-xs transition active:scale-95 cursor-pointer flex items-center justify-center gap-1.5 border ${
+                  dropoffStatus === 'completed'
+                    ? 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100'
+                    : 'bg-emerald-600 text-white border-transparent hover:bg-emerald-700 shadow-sm shadow-emerald-200'
+                }`}
+              >
+                {dropoffStatus === 'completed' ? 'Retorno Pendente' : 'Confirmar Retorno'}
+              </button>
+            </>
           </div>
         </div>
  
