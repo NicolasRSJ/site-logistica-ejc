@@ -10,7 +10,7 @@ import {
 import { getAuth } from 'firebase/auth';
 
 // Firebase Config from firebase-applet-config.json
-const firebaseConfig = {
+export const firebaseConfig = {
   projectId: "macro-courier-jdw77",
   appId: "1:845629454968:web:3f8c40ac789625cc9f8b8d",
   apiKey: "AIzaSyCyri_GTTHrIoT-QLu2NSYHT0HMYczhhTY",

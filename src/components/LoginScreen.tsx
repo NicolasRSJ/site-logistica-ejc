@@ -19,8 +19,6 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
   // Admin credentials
   const [emailInput, setEmailInput] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
-  const [adminNameInput, setAdminNameInput] = useState('');
-  const [isAdminRegister, setIsAdminRegister] = useState(false);
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -109,14 +107,10 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
       return;
     }
 
-    if (isAdminRegister && !adminNameInput) {
-      setError('Por favor, informe seu nome de administrador.');
-      setIsLoading(false);
-      return;
-    }
+    const trimmedEmail = emailInput.trim().toLowerCase();
 
     // Direct credentials login fallback
-    if (emailInput.trim().toLowerCase() === 'nicolassjesus@gmail.com' && passwordInput === 'amorsupremo') {
+    if (trimmedEmail === 'nicolassjesus@gmail.com' && passwordInput === 'amorsupremo') {
       const adminUser: User = {
         id: 'admin_nicolas_rod',
         name: 'Nicolas Rodrigues',
@@ -146,61 +140,62 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
     }
 
     try {
-      if (isAdminRegister) {
-        // Create user with Firebase Auth
-        const credential = await createUserWithEmailAndPassword(auth, emailInput, passwordInput);
-        
-        // Update user profile display name
-        await updateProfile(credential.user, {
-          displayName: adminNameInput
-        });
+      // 1. Search database first for user registered via Admin Dashboard
+      const usersSnapshot = await getDocs(collection(db, 'users'));
+      let dbAdminUser: User | null = null;
+      let matchedPassword = false;
 
-        const adminUser: User = {
-          id: credential.user.uid,
-          name: adminNameInput,
-          phone: '',
-          assignedEncontristas: [],
-          role: 'admin',
-          email: emailInput,
-          loginMethod: 'email'
-        };
+      usersSnapshot.forEach((doc) => {
+        const data = doc.data();
+        if (data.email && data.email.trim().toLowerCase() === trimmedEmail) {
+          if (data.role === 'admin') {
+            dbAdminUser = {
+              id: doc.id,
+              name: data.name,
+              phone: data.phone || '',
+              assignedEncontristas: data.assignedEncontristas || [],
+              role: 'admin',
+              email: data.email,
+              loginMethod: 'email'
+            };
+            if (data.password && data.password === passwordInput) {
+              matchedPassword = true;
+            }
+          }
+        }
+      });
 
-        // Save admin user reference in the users collection with role: 'admin'
-        await setDoc(doc(db, 'users', credential.user.uid), {
-          name: adminNameInput,
-          phone: '',
-          assignedEncontristas: [],
-          role: 'admin',
-          email: emailInput
-        });
-
-        setIsLoading(false);
-        onLoginSuccess(adminUser);
-      } else {
-        // Sign in with Firebase Auth
-        const credential = await signInWithEmailAndPassword(auth, emailInput, passwordInput);
-        
-        const adminUser: User = {
-          id: credential.user.uid,
-          name: credential.user.displayName || 'Administrador Geral',
-          phone: '',
-          assignedEncontristas: [],
-          role: 'admin',
-          email: emailInput,
-          loginMethod: 'email'
-        };
-
-        setIsLoading(false);
-        onLoginSuccess(adminUser);
+      if (dbAdminUser) {
+        if (matchedPassword) {
+          setIsLoading(false);
+          onLoginSuccess(dbAdminUser);
+          return;
+        } else {
+          setError('Senha incorreta para esta conta de administrador.');
+          setIsLoading(false);
+          return;
+        }
       }
+
+      // 2. Fallback: Authenticate with Firebase Authentication (e.g. for pre-existing auth accounts)
+      const credential = await signInWithEmailAndPassword(auth, emailInput.trim(), passwordInput);
+      
+      const adminUser: User = {
+        id: credential.user.uid,
+        name: credential.user.displayName || 'Administrador Geral',
+        phone: '',
+        assignedEncontristas: [],
+        role: 'admin',
+        email: emailInput.trim(),
+        loginMethod: 'email'
+      };
+
+      setIsLoading(false);
+      onLoginSuccess(adminUser);
     } catch (err: any) {
       console.error(err);
       if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
         setError('E-mail ou senha inválidos do Administrador.');
-      } else if (err.code === 'auth/email-already-in-use') {
-        setError('Este e-mail de administrador já está cadastrado.');
-      } else if (err.code === 'auth/weak-password') {
-        setError('A senha do administrador deve ter pelo menos 6 caracteres.');
       } else if (err.code === 'auth/invalid-email') {
         setError('Por favor, insira um endereço de e-mail válido.');
       } else {
@@ -332,33 +327,10 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
                 </h2>
               </div>
               <p className="text-xs text-slate-500 mb-5 leading-relaxed">
-                {isAdminRegister 
-                  ? 'Cadastre uma nova conta de administrador para gerenciar encontristas, motoristas e tarefas.' 
-                  : 'Faça login com seu e-mail administrativo para acessar o painel de logística e CRUD de dados.'}
+                Faça login com seu e-mail administrativo para acessar o painel de logística e CRUD de dados.
               </p>
 
               <form onSubmit={handleAdminSubmit} className="space-y-4">
-                {isAdminRegister && (
-                  <div>
-                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
-                      Nome Completo
-                    </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
-                        <UserIcon className="h-4 w-4" />
-                      </div>
-                      <input
-                        type="text"
-                        placeholder="Nome do Administrador"
-                        value={adminNameInput}
-                        onChange={(e) => setAdminNameInput(e.target.value)}
-                        disabled={isLoading}
-                        className="w-full bg-slate-50 border border-slate-200 focus:border-blue-600 focus:ring-1 focus:ring-blue-600 rounded-xl py-3 pl-10 pr-4 text-slate-800 placeholder-slate-400 text-sm font-semibold transition duration-200 focus:outline-none"
-                      />
-                    </div>
-                  </div>
-                )}
-
                 <div>
                   <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
                     E-mail do Administrador
@@ -418,7 +390,7 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
                   ) : (
                     <>
                       <Shield className="h-3.5 w-3.5" />
-                      <span>{isAdminRegister ? 'Criar Cadastro' : 'Entrar como Admin'}</span>
+                      <span>Entrar como Admin</span>
                     </>
                   )}
                 </button>

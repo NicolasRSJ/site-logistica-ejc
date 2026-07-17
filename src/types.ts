@@ -7,6 +7,7 @@ export interface User {
   email?: string;
   type?: 'solteiro' | 'casal';
   loginMethod?: 'phone' | 'email';
+  password?: string;
 }
 
 export interface Task {

@@ -9,9 +9,17 @@ import {
 import { 
   collection, doc, getDocs, setDoc, addDoc, updateDoc, deleteDoc 
 } from 'firebase/firestore';
-import { db } from '../firebase';
+import { initializeApp, getApps } from 'firebase/app';
+import { getAuth, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { db, firebaseConfig } from '../firebase';
 import { User, Encontrista, Task } from '../types';
 import { getCircleColorStyles } from './Dashboard';
+
+const getSecondaryAuth = () => {
+  const apps = getApps();
+  const secondaryApp = apps.find(app => app.name === 'Secondary') || initializeApp(firebaseConfig, 'Secondary');
+  return getAuth(secondaryApp);
+};
 
 interface AdminDashboardProps {
   user: User;
@@ -72,6 +80,7 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
   const [userRole, setUserRole] = useState<'admin' | 'user'>('user');
   const [userType, setUserType] = useState<'solteiro' | 'casal'>('solteiro');
   const [userAssignedEnc, setUserAssignedEnc] = useState<string[]>([]);
+  const [userPassword, setUserPassword] = useState('');
 
   // Form States - Task
   const [taskTitle, setTaskTitle] = useState('');
@@ -131,7 +140,8 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
           email: data.email || '',
           assignedEncontristas: data.assignedEncontristas || [],
           role: data.role || 'user',
-          type: data.type || 'solteiro'
+          type: data.type || 'solteiro',
+          password: data.password || ''
         });
       });
       setUsuarios(userList);
@@ -261,6 +271,7 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
     setUserRole('user');
     setUserType('solteiro');
     setUserAssignedEnc([]);
+    setUserPassword('');
     setIsUserModalOpen(true);
   };
 
@@ -272,6 +283,7 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
     setUserRole(u.role || 'user');
     setUserType(u.type || 'solteiro');
     setUserAssignedEnc(u.assignedEncontristas || []);
+    setUserPassword(u.password || '');
     setIsUserModalOpen(true);
   };
 
@@ -282,6 +294,21 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
       return;
     }
 
+    if (userRole === 'admin') {
+      if (!userEmail.trim()) {
+        showNotification('Administradores precisam de um E-mail cadastrado.', 'error');
+        return;
+      }
+      if (!userPassword.trim()) {
+        showNotification('Administradores precisam de uma Senha de acesso.', 'error');
+        return;
+      }
+      if (userPassword.trim().length < 6) {
+        showNotification('A senha do administrador deve ter pelo menos 6 caracteres.', 'error');
+        return;
+      }
+    }
+
     try {
       const payload: Omit<User, 'id'> = {
         name: userName.trim(),
@@ -289,8 +316,21 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
         email: userEmail.trim(),
         role: userRole,
         type: userType,
-        assignedEncontristas: userAssignedEnc
+        assignedEncontristas: userAssignedEnc,
+        password: userPassword.trim()
       };
+
+      if (userRole === 'admin' && userEmail.trim() && userPassword.trim()) {
+        try {
+          const secAuth = getSecondaryAuth();
+          const credential = await createUserWithEmailAndPassword(secAuth, userEmail.trim(), userPassword.trim());
+          await updateProfile(credential.user, {
+            displayName: userName.trim()
+          });
+        } catch (authErr: any) {
+          console.warn("Could not register secondary Auth user (may already exist):", authErr);
+        }
+      }
 
       if (editingUser) {
         const docRef = doc(db, 'users', editingUser.id);
@@ -1227,6 +1267,19 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
                     </select>
                   </div>
                 </div>
+
+                {userRole === 'admin' && (
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Senha de Acesso do Administrador *</label>
+                    <input 
+                      type="password" 
+                      value={userPassword}
+                      onChange={(e) => setUserPassword(e.target.value)}
+                      placeholder="Mínimo de 6 caracteres"
+                      className="w-full bg-slate-50 border border-slate-200 focus:border-blue-600 focus:ring-1 focus:ring-blue-600 rounded-xl py-2 px-3 text-xs sm:text-sm font-semibold focus:outline-none"
+                    />
+                  </div>
+                )}
 
                 {/* Assing Encontristas Section */}
                 <div className="space-y-2">
