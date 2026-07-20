@@ -128,6 +128,8 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
             dropoff_day3: d3,
             isMoita: !!data.isMoita,
             circleColor: data.circleColor || '',
+            residenceType: data.residenceType || undefined,
+            residenceResponsibleDetails: data.residenceResponsibleDetails || '',
           });
         }
       }
@@ -320,25 +322,25 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
             <span className="text-[9px] font-bold text-blue-600 uppercase tracking-wider block">Horários e Regras de Logística</span>
             {activeDay === 1 && (
               <>
-                <p className="text-xs font-bold text-slate-800 mt-0.5">19:00 às 21:00 (Sexta)</p>
+                <p className="text-xs font-bold text-slate-800 mt-0.5">19:00 às 22:05 (Sexta)</p>
                 <p className="text-[11px] text-slate-500 mt-0.5 leading-snug">
-                  Os jovens devem ser buscados em casa (antes das 19:00) e levados de volta ao final (após 21:00).
+                  Os jovens devem ser buscados em casa (antes das 19:00) e levados de volta ao final (após 22:05).
                 </p>
               </>
             )}
             {activeDay === 2 && (
               <>
-                <p className="text-xs font-bold text-slate-800 mt-0.5">07:00 às 20:00 (Sábado)</p>
+                <p className="text-xs font-bold text-slate-800 mt-0.5">07:00 às 20:15 (Sábado)</p>
                 <p className="text-[11px] text-slate-500 mt-0.5 leading-snug">
-                  Os jovens devem ser buscados em casa (antes das 07:00) e levados de volta ao final (após 20:00).
+                  Os jovens devem ser buscados em casa (antes das 07:00) e levados de volta ao final (após 20:15).
                 </p>
               </>
             )}
             {activeDay === 3 && (
               <>
-                <p className="text-xs font-bold text-slate-800 mt-0.5">07:00 às 22:00 (Domingo)</p>
+                <p className="text-xs font-bold text-slate-800 mt-0.5">07:00 às 20:25 (Domingo)</p>
                 <p className="text-[11px] text-slate-500 mt-0.5 leading-snug">
-                  Os jovens devem ser buscados em casa (antes das 07:00) e levados de volta ao final do encontro (após 22:00).
+                  Os jovens devem ser buscados em casa (antes das 07:00) e levados de volta ao final do encontro (após 20:25).
                 </p>
               </>
             )}

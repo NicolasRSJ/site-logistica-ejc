@@ -72,6 +72,8 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
   const [encAddPhones, setEncAddPhones] = useState('');
   const [encIsMoita, setEncIsMoita] = useState(false);
   const [encCircleColor, setEncCircleColor] = useState('');
+  const [encResidenceType, setEncResidenceType] = useState<'Pai e Mãe' | 'Pai' | 'Mãe' | 'Sozinho' | 'Responsável' | ''>('');
+  const [encResidenceResponsibleDetails, setEncResidenceResponsibleDetails] = useState('');
 
   // Form States - User/Buscador
   const [userName, setUserName] = useState('');
@@ -119,6 +121,8 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
           additionalPhones: data.additionalPhones || '',
           isMoita: !!data.isMoita,
           circleColor: data.circleColor || '',
+          residenceType: data.residenceType || undefined,
+          residenceResponsibleDetails: data.residenceResponsibleDetails || '',
           pickup_day1: data.pickup_day1,
           dropoff_day1: data.dropoff_day1,
           pickup_day2: data.pickup_day2,
@@ -185,6 +189,8 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
     setEncAddPhones('');
     setEncIsMoita(false);
     setEncCircleColor('');
+    setEncResidenceType('');
+    setEncResidenceResponsibleDetails('');
     setIsEncModalOpen(true);
   };
 
@@ -200,6 +206,8 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
     setEncAddPhones(enc.additionalPhones);
     setEncIsMoita(!!enc.isMoita);
     setEncCircleColor(enc.circleColor || '');
+    setEncResidenceType(enc.residenceType || '');
+    setEncResidenceResponsibleDetails(enc.residenceResponsibleDetails || '');
     setIsEncModalOpen(true);
   };
 
@@ -221,7 +229,9 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
         complement: encComplement.trim(),
         additionalPhones: encAddPhones.trim(),
         isMoita: encIsMoita,
-        circleColor: encCircleColor.trim()
+        circleColor: encCircleColor.trim(),
+        residenceType: encResidenceType ? (encResidenceType as any) : null,
+        residenceResponsibleDetails: encResidenceType === 'Responsável' ? encResidenceResponsibleDetails.trim() : ''
       };
 
       if (editingEnc) {
@@ -755,12 +765,17 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
                                       ⚠️ {enc.disability}
                                     </span>
                                   )}
+                                  {enc.residenceType && (
+                                    <span className="text-blue-600 font-semibold flex items-center gap-1 text-[10px]" title={enc.residenceType === 'Responsável' ? `Responsável: ${enc.residenceResponsibleDetails || ''}` : `Mora com: ${enc.residenceType}`}>
+                                      🏠 {enc.residenceType === 'Responsável' ? `Resp: ${enc.residenceResponsibleDetails || ''}` : `Mora: ${enc.residenceType}`}
+                                    </span>
+                                  )}
                                   {enc.observations && (
                                     <span className="text-slate-500 italic text-[10px] truncate max-w-[150px]" title={enc.observations}>
                                       Obs: {enc.observations}
                                     </span>
                                   )}
-                                  {enc.medication === 'Nenhuma' && enc.disability === 'Nenhuma' && !enc.observations && (
+                                  {enc.medication === 'Nenhuma' && enc.disability === 'Nenhuma' && !enc.observations && !enc.residenceType && (
                                     <span className="text-slate-400">-</span>
                                   )}
                                 </div>
@@ -1112,6 +1127,47 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
                       className="w-full bg-slate-50 border border-slate-200 focus:border-blue-600 focus:ring-1 focus:ring-blue-600 rounded-xl py-2 px-3 text-xs sm:text-sm font-semibold focus:outline-none"
                     />
                   </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Tipo de Residência */}
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Tipo de Residência</label>
+                    <select
+                      value={encResidenceType}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setEncResidenceType(val as any);
+                        if (val !== 'Responsável') {
+                          setEncResidenceResponsibleDetails('');
+                        }
+                      }}
+                      className="w-full bg-slate-50 border border-slate-200 focus:border-blue-600 focus:ring-1 focus:ring-blue-600 rounded-xl py-2 px-3 text-xs sm:text-sm font-semibold focus:outline-none"
+                    >
+                      <option value="">Selecione...</option>
+                      <option value="Pai e Mãe">Pai e Mãe</option>
+                      <option value="Pai">Pai</option>
+                      <option value="Mãe">Mãe</option>
+                      <option value="Sozinho">Sozinho</option>
+                      <option value="Responsável">Responsável</option>
+                    </select>
+                  </div>
+
+                  {/* Nome do Responsável (se escolher Responsável) */}
+                  {encResidenceType === 'Responsável' ? (
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Quem é o Responsável?</label>
+                      <input 
+                        type="text" 
+                        value={encResidenceResponsibleDetails}
+                        onChange={(e) => setEncResidenceResponsibleDetails(e.target.value)}
+                        placeholder="Ex: Tio, Avó, Amigo..."
+                        className="w-full bg-slate-50 border border-slate-200 focus:border-blue-600 focus:ring-1 focus:ring-blue-600 rounded-xl py-2 px-3 text-xs sm:text-sm font-semibold focus:outline-none"
+                      />
+                    </div>
+                  ) : (
+                    <div className="hidden sm:block"></div>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

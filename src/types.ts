@@ -41,4 +41,6 @@ export interface Encontrista {
   dropoff_day3?: 'pending' | 'completed';
   isMoita?: boolean;
   circleColor?: string; // e.g. "Vermelho", "Azul", "Amarelo", "Verde", "Laranja", "Roxo"
+  residenceType?: 'Pai e Mãe' | 'Pai' | 'Mãe' | 'Sozinho' | 'Responsável';
+  residenceResponsibleDetails?: string;
 }

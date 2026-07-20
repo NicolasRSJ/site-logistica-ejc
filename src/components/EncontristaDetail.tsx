@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { 
   X, MapPin, Phone, HeartPulse, ShieldAlert, FileText, 
-  Share2, Compass, PhoneCall, CheckCircle, Clock 
+  Share2, Compass, PhoneCall, CheckCircle, Clock, Home 
 } from 'lucide-react';
 import { Encontrista } from '../types';
 import { getCircleColorStyles } from './Dashboard';
@@ -28,6 +28,7 @@ export default function EncontristaDetail({ encontrista, onClose, onToggleStatus
       `🌈 *Círculo:* ${encontrista.circleColor || 'Não informado'}\n` +
       `🌱 *Equipe Moita:* ${encontrista.isMoita ? 'Sim' : 'Não'}\n` +
       `📍 *Endereço:* ${encontrista.address} ${encontrista.complement ? `(${encontrista.complement})` : ''}\n` +
+      `🏠 *Mora com:* ${encontrista.residenceType || 'Não informado'}${encontrista.residenceType === 'Responsável' && encontrista.residenceResponsibleDetails ? ` (${encontrista.residenceResponsibleDetails})` : ''}\n` +
       `💊 *Medicação:* ${encontrista.medication || 'Nenhuma'}\n` +
       `⚠️ *Deficiência:* ${encontrista.disability || 'Nenhuma'}\n` +
       `📝 *Obs:* ${encontrista.observations || 'Nenhuma'}\n` +
@@ -219,6 +220,26 @@ export default function EncontristaDetail({ encontrista, onClose, onToggleStatus
  
           {/* Secondary Details */}
           <div className="space-y-4">
+            {/* Residence Type */}
+            {encontrista.residenceType && (
+              <div className="bg-slate-50 rounded-2xl p-4.5 border border-slate-200/60">
+                <div className="flex gap-2.5 items-center text-slate-400 mb-2">
+                  <Home className="h-4 w-4" />
+                  <span className="text-[9px] font-bold uppercase tracking-widest">Estrutura de Residência</span>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <p className="text-xs font-bold text-slate-700">
+                    Mora com: <span className="text-blue-600 font-extrabold">{encontrista.residenceType}</span>
+                  </p>
+                  {encontrista.residenceType === 'Responsável' && encontrista.residenceResponsibleDetails && (
+                    <p className="text-[11px] text-slate-500 font-medium bg-white px-2.5 py-1.5 rounded-lg border border-slate-150 mt-1">
+                      <span className="font-bold text-slate-600">Responsável:</span> {encontrista.residenceResponsibleDetails}
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Additional Contacts */}
             <div className="bg-slate-50 rounded-2xl p-4.5 border border-slate-200/60">
               <div className="flex gap-2.5 items-center text-slate-400 mb-2">
