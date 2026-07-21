@@ -14,6 +14,7 @@ import { getAuth, createUserWithEmailAndPassword, updateProfile } from 'firebase
 import { db, firebaseConfig } from '../firebase';
 import { User, Encontrista, Task } from '../types';
 import { getCircleColorStyles } from './Dashboard';
+import AdminReports from './AdminReports';
 
 const getSecondaryAuth = () => {
   const apps = getApps();
@@ -26,7 +27,7 @@ interface AdminDashboardProps {
   onLogout: () => void;
 }
 
-type AdminTab = 'encontristas' | 'usuarios' | 'tarefas';
+type AdminTab = 'encontristas' | 'usuarios' | 'tarefas' | 'relatorios';
 
 export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
   const [activeTab, setActiveTab] = useState<AdminTab>('encontristas');
@@ -592,7 +593,7 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
           <div className="border-b border-slate-200 p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-50/50">
             
             {/* Nav Tabs */}
-            <div className="flex bg-slate-100 p-1 rounded-2xl self-start">
+            <div className="flex bg-slate-100 p-1 rounded-2xl self-start flex-wrap gap-1">
               <button
                 onClick={() => { setActiveTab('encontristas'); setSearchTerm(''); }}
                 className={`px-4 py-2 text-xs font-bold rounded-xl transition ${
@@ -623,21 +624,33 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
               >
                 📝 Tarefas ({tasks.length})
               </button>
+              <button
+                onClick={() => { setActiveTab('relatorios'); setSearchTerm(''); }}
+                className={`px-4 py-2 text-xs font-bold rounded-xl transition ${
+                  activeTab === 'relatorios' 
+                    ? 'bg-white text-slate-900 shadow-xs border border-slate-200/50' 
+                    : 'text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                📊 Relatórios
+              </button>
             </div>
 
             {/* Controls Side */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 justify-end flex-wrap">
               {/* Search */}
-              <div className="relative flex-1 md:w-60">
-                <Search className="absolute inset-y-0 left-3 h-4 w-4 text-slate-400 m-auto" />
-                <input
-                  type="text"
-                  placeholder="Pesquisar..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full bg-white border border-slate-200 focus:border-blue-600 focus:ring-1 focus:ring-blue-600 rounded-xl py-2 pl-9 pr-4 text-xs font-semibold placeholder-slate-400 focus:outline-none"
-                />
-              </div>
+              {activeTab !== 'relatorios' && (
+                <div className="relative flex-1 md:w-60 min-w-[150px]">
+                  <Search className="absolute inset-y-0 left-3 h-4 w-4 text-slate-400 m-auto" />
+                  <input
+                    type="text"
+                    placeholder="Pesquisar..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full bg-white border border-slate-200 focus:border-blue-600 focus:ring-1 focus:ring-blue-600 rounded-xl py-2 pl-9 pr-4 text-xs font-semibold placeholder-slate-400 focus:outline-none"
+                  />
+                </div>
+              )}
 
               {/* Reload Button */}
               <button
@@ -987,6 +1000,10 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
                       </div>
                     )}
                   </div>
+                )}
+
+                {activeTab === 'relatorios' && (
+                  <AdminReports encontristas={encontristas} usuarios={usuarios} tasks={tasks} />
                 )}
 
               </div>
