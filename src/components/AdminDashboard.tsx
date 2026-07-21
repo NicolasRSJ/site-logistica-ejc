@@ -492,7 +492,7 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
       
       {/* Header Banner */}
-      <header className="bg-slate-900 text-white shrink-0 shadow-md">
+      <header className="bg-slate-900 text-white shrink-0 shadow-md no-print">
         <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="bg-blue-600 p-2 rounded-xl">
@@ -523,7 +523,7 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 py-6 sm:px-6 lg:px-8 space-y-6">
         
         {/* Statistics Widgets */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 no-print">
           <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-3">
             <div className="bg-blue-50 text-blue-600 p-2.5 rounded-xl shrink-0">
               <BookOpen className="h-5 w-5" />
@@ -575,7 +575,7 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            className={`p-3.5 rounded-xl border flex items-center gap-2 ${
+            className={`p-3.5 rounded-xl border flex items-center gap-2 no-print ${
               notif.type === 'success' 
                 ? 'bg-emerald-50 border-emerald-100 text-emerald-800' 
                 : 'bg-red-50 border-red-100 text-red-800'
@@ -590,7 +590,7 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
         <div className="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden">
           
           {/* Tab Switcher & Search Bar Header */}
-          <div className="border-b border-slate-200 p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-50/50">
+          <div className="border-b border-slate-200 p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-50/50 no-print">
             
             {/* Nav Tabs */}
             <div className="flex bg-slate-100 p-1 rounded-2xl self-start flex-wrap gap-1">

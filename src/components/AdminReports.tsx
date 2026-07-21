@@ -200,29 +200,77 @@ export default function AdminReports({ encontristas, usuarios, tasks }: AdminRep
       {/* Dynamic print stylesheet so only the document sheet prints */}
       <style dangerouslySetInnerHTML={{ __html: `
         @media print {
-          body {
+          /* 1. Reset standard layout styles for printing */
+          html, body {
             background-color: #ffffff !important;
             color: #000000 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            height: auto !important;
+            overflow: visible !important;
           }
-          /* Hide app elements */
-          body > :not(#printable-report-container) {
+
+          /* 2. Hide all non-printable elements using display: none */
+          .no-print,
+          header,
+          footer,
+          nav,
+          aside,
+          button,
+          input,
+          textarea,
+          [role="alert"] {
             display: none !important;
           }
-          #printable-report-container {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: auto;
-            background: white !important;
+
+          /* 3. Strip background, borders, shadows, and paddings from all main parent wrappers so they are transparent and don't take space */
+          #root,
+          .min-h-screen,
+          main,
+          .bg-white.border.border-slate-200.rounded-3xl.shadow-sm.overflow-hidden {
+            background: transparent !important;
+            background-color: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
             padding: 0 !important;
             margin: 0 !important;
+            max-width: 100% !important;
+            width: 100% !important;
+            min-height: 0 !important;
+            height: auto !important;
           }
-          .no-print {
-            display: none !important;
+
+          /* 4. Style the printable container to occupy full page width cleanly */
+          #printable-report-container {
+            display: block !important;
+            background: #ffffff !important;
+            background-color: #ffffff !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            border: none !important;
+            box-shadow: none !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            height: auto !important;
+            position: relative !important;
           }
+
+          /* 5. Keep nice inner alignments for grids/flex/tables inside the printable container */
+          #printable-report-container .grid {
+            display: grid !important;
+          }
+          #printable-report-container .flex {
+            display: flex !important;
+          }
+          #printable-report-container table {
+            display: table !important;
+            width: 100% !important;
+          }
+
+          /* 6. Avoid breaking sections inside a page (like specific health record cards) */
           .print-break-inside-avoid {
-            page-break-inside: avoid;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
           }
         }
       `}} />
